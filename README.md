@@ -1,4 +1,4 @@
-# deadFish >/x>
+# >/x> deadFish
 Simple terminal implementation mainly aimed for uC
 
 ## Demo
