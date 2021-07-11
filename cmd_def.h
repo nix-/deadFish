@@ -1,10 +1,3 @@
-/*
- * cmd_def.h
- *
- *  Created on: Apr. 11, 2021
- *      Author: niks
- */
-
 #ifndef DEADFISH_CMD_DEF_H_
 #define DEADFISH_CMD_DEF_H_
 

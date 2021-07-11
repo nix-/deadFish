@@ -1,10 +1,3 @@
-/*
- * cmd_def.c
- *
- *  Created on: Apr. 11, 2021
- *      Author: niks
- */
-
 #include "cmd_def.h"
 
 #include "stdio.h"
@@ -12,9 +5,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "stdbool.h"
-
-// Create New Command
-// define function, extend structure
 
 // format of the help command
 /*
@@ -36,6 +26,9 @@ Options:
   --drifting    Drifting mine.
 */
 
+// Create New Command
+// define function, extend structure
+
 #define COMMANDS_LIST_LENGHT  (sizeof(commands_list)/sizeof(commands_list[0]))
 
 int cmd_template(const int argc, const char *argv[]);
@@ -43,19 +36,18 @@ int cmd_template(const int argc, const char *argv[]);
 int cmd_empty(const int argc, const char *argv[]);
 int cmd_help(const int argc, const char *argv[]);
 int cmd_info(const int argc, const char *argv[]);
-int cmd_flash(const int argc, const char *argv[]);
-int cmd_rtc(const int argc, const char *argv[]);
-int cmd_nfc(const int argc, const char *argv[]);
 int cmd_clear(const int argc, const char *argv[]);
 int cmd_test(const int argc, const char *argv[]);
 
 command_t commands_list[] = {
-        {"",        "",         cmd_empty,      ""},
-        {"help",    "",         cmd_help,       "Listing all of the available commands."},
-        {"info",    "",         cmd_info,       "Information about terminal."},
-        {"clear",   "",         cmd_clear,      "Removing accumulated data in the terminal."},
-        {"test",    "",         cmd_test,       "Place holder for experimenting."},
-        {"example", "",         cmd_template,   "Template for a terminal-call function."},
+    {"",        "",         cmd_empty,      ""},
+    // basic commands
+    {"help",    "",         cmd_help,       "Listing all of the available commands."},
+    {"info",    "",         cmd_info,       "Information about terminal."},
+    {"clear",   "",         cmd_clear,      "Removing accumulated data in the terminal."},
+    // extended commands
+    {"test",    "",         cmd_test,       "Place holder for experimenting."},
+    {"example", "",         cmd_template,   "Template for a terminal-call function."},
 };
 
 
@@ -89,6 +81,9 @@ int cmd_empty(const int argc, const char *argv[])
 }
 
 
+/**
+* sending command for clearing the terminal
+*/
 int cmd_clear(const int argc, const char *argv[])
 {
     printf(CLEAR_SCREEN);
@@ -113,18 +108,28 @@ int cmd_info(const int argc, const char *argv[])
     printf("\r");
     //sleep(0.731);
     for (i=1; i<23; i+=2) {
-        printf("\a%*s%s", i, "", BLU ">/"MAG"o"EOC">\r");
+        printf("\a%*s%s", i, "", BLU ">/"MAG"o"EOC">\r"); 
+        fflush(stdout);
         //sleep((0.021*i)+100);
+        sleep(1);
     }
     --i;
-    printf("\a%*s%s", i, "", BLU ">/x"EOC">\r");
+    printf("\a%*s%s", i, "", BLU ">/x"EOC">\r"); 
+    fflush(stdout);
     //sleep(0.777);
+    sleep(1);
     printf(BLU "\r\n(only dead fish goes with the flow)"EOC"\r\n");
+    fflush(stdout);
     //sleep(0.777);
+    sleep(1);
+
     return 0;
 }
 
 
+/**
+* print progress bar
+*/
 static void progres_bar(unsigned int value, unsigned int max_value, const char* color)
 {
     unsigned int proc = (value * 10) / max_value;
@@ -162,9 +167,11 @@ int cmd_template(const int argc, const char *argv[])
     int option = 0;
 
     optind = 0; // initialize opt index for parsing terminal input
-    while ((option = getopt(argc, argv, "ht:")) != -1) {
+    while ((option = getopt(argc, argv, "ht:m::")) != -1) {
         switch (option) {
+
         case 'h':
+            // example of help output
             printf(
                 "Naval Fate.\r\n"
                 "\r\n"
@@ -184,15 +191,30 @@ int cmd_template(const int argc, const char *argv[])
                 "  --drifting    Drifting mine.\r\n"
                 );
             break;
+
         case 't':
             printf("-t input: %s\r\n", optarg);
             break;
+
+        // handling multiple variables
+        case 'm': {
+            char* arg1 = NULL;
+            char* arg2 = NULL;
+            arg1 = argv[optind++];
+            // ...
+            arg2 = argv[optind];
+            printf("-m multiple attributes: %s %s\r\n", arg1, arg2);
+            break;
+        }
+
         case ':':
             printf("option needs a value\r\n");
            break;
+        
         case '?': //used for some unknown options
             printf("unknown option: %c\r\n", optopt);
            break;
+        
         default:
             printf("Usage.\r\n");
             return -1;
@@ -200,6 +222,52 @@ int cmd_template(const int argc, const char *argv[])
     }
 
     return 0;
+}
+
+
+/**
+* iluctration of the usage of commands in terminal
+*/
+static void paralel_progress_bar_example(int init_percentage)
+{
+    int i = init_percentage;
+
+    for (; i<=100; i++) {
+
+        printf("\r\n %16s ", "Test 1");
+        progres_bar(i, 100, BLU);
+        fflush(stdout);
+
+        printf("\r\n %16s ", "Test 2");
+        progres_bar(100-i, 100, RED);
+        fflush(stdout);
+
+        printf("\r\n %16s ", "Test cat");
+        progres_bar(i, 200, GRN);
+        fflush(stdout);
+
+        printf("\r\n %16s ", "test dog");
+        progres_bar(100-i, 200, YEL);
+        fflush(stdout);
+
+        printf("\r\n %16s ", "Test mouse");
+        progres_bar(100-i, 100, MAG);
+        fflush(stdout);
+
+        printf("\r\n %16s ", "test fox");
+        progres_bar((i*79)%0xff, 0xff, CYN);
+        fflush(stdout);
+
+        printf("\033[6A\r"); // jump back at the start of progress-bars
+        fflush(stdout);
+
+        sleep(1);
+    }
+
+    printf("\033[6B"); // jump at after the progress bars
+    printf("\r\nProgress Done.\r\n");
+
+    return;
 }
 
 
@@ -239,36 +307,9 @@ int cmd_test(const int argc, const char *argv[])
         case 'b' : breadth = atoi(optarg);
             printf("breadth\r\n");
             break;
-        case 't': {
-            int i = atoi(optarg);
-            for (; i<=100; i++) {
-
-                printf("Simulation of progress ");
-                progres_bar(i, 100, BLU);
-
-                printf("\r\nSimulation of progress ");
-                progres_bar(100-i, 100, RED);
-
-                printf("\r\nSimulation of progress ");
-                progres_bar(i, 200, GRN);
-
-                printf("\r\nSimulation of progress ");
-                progres_bar(100-i, 200, YEL);
-
-                printf("\r\nSimulation of progress ");
-                progres_bar(100-i, 100, MAG);
-
-                printf("\r\nSimulation of progress ");
-                progres_bar(i, 100, CYN);
-
-                printf("\033[5A\r");
-
-                sleep(1);
-            }
-            printf("\033[5B");
-            printf("\r\nProgress Done.\r\n");
+        case 't':
+            paralel_progress_bar_example(atoi(optarg));
             break;
-        }
         default:
             printf("usage.\r\n");
             return -1;

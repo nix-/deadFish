@@ -41,6 +41,7 @@ void donut_receive_key(const char c)
 {
     char symbol = c;
 
+    // todo: this need to be reworked. 
     // no-control character
     if (isalnum(symbol)
             || (symbol == '\n')
@@ -130,11 +131,13 @@ int cmd_handler(char **cmd_list)
 {
     int i = 0;
     int len = cmd_get_list_lenght();
+    bool status = false;
     // going trought list of commands
     if (cmd_line.cmd != NULL) {
     	for (i = 0; (i < len); i++) {
     	    if (!strncmp(cmd_line.cmd, commands_list[i].cmd, 16)) {
     	        commands_list[i].exec(cmd_line.argc, cmd_line.argv);
+    	        status = true;
     	        break;
     	    }
     	}
@@ -142,5 +145,8 @@ int cmd_handler(char **cmd_list)
     // command prompt
     printf(BLU ">/x" EOC "> ");
 
-    return 0;
+    if (status) {
+    	return 0; // found command
+    } 
+    return 1; // no command found
 }
