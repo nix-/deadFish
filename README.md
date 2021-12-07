@@ -1,5 +1,5 @@
 # >/x> deadFish
-Simple terminal implementation mainly aimed for uC
+Simple terminal implementation aimed for uC
 
 ## Demo
 
